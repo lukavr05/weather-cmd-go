@@ -7,36 +7,80 @@ import (
   "net/http"
 )
 
+type WeatherResponse struct {
+	Coord      Coordinates `json:"coord"`
+	Weather    []Weather   `json:"weather"`
+	Base       string      `json:"base"`
+	Main       MainWeather `json:"main"`
+	Visibility int         `json:"visibility"`
+	Wind       Wind        `json:"wind"`
+	Clouds     Clouds      `json:"clouds"`
+	Dt         int         `json:"dt"`
+	Sys        System      `json:"sys"`
+	Timezone   int         `json:"timezone"`
+	ID         int         `json:"id"`
+	Name       string      `json:"name"`
+	Cod        int         `json:"cod"`
+}
+
+// Coordinates struct for the "coord" field
+type Coordinates struct {
+	Lon float64 `json:"lon"`
+	Lat float64 `json:"lat"`
+}
+
+// Weather struct for the "weather" field
 type Weather struct {
-    Location struct {
-        Name    string `json:"name"`
-        Country string `json:"country"`
-    } `json:"location"`
+	ID          int    `json:"id"`
+	Main        string `json:"main"`
+	Description string `json:"description"`
+	Icon        string `json:"icon"`
+}
 
-    Current struct {
-    TempC float64 `json:"temp_c"`
-        Condition struct {
-            Text string `json:"text"`
-        } `json:"condition"`
-    } `json:"current"`
+// MainWeather struct for the "main" field
+type MainWeather struct {
+	Temp       float64 `json:"temp"`
+	FeelsLike  float64 `json:"feels_like"`
+	TempMin    float64 `json:"temp_min"`
+	TempMax    float64 `json:"temp_max"`
+	Pressure   int     `json:"pressure"`
+	Humidity   int     `json:"humidity"`
+	SeaLevel   int     `json:"sea_level"`
+	GrndLevel  int     `json:"grnd_level"`
+}
 
-Forecast struct {
-        ForecastDay []struct {
-            Hour []struct {
-                TimeEpoch    int64   `json:"time_epoch"`
-                TempC        float64 `json:"temp_c"`
-                Condition    struct {
-                    Text string `json:"text"`
-                } `json:"condition"`
-                ChanceOfRain float64 `json:"chance_of_rain"`
-            } `json:"hour"`
-        } `json:"forecastday"`
-    } `json:"forecast"`
+// Wind struct for the "wind" field
+type Wind struct {
+	Speed float64 `json:"speed"`
+	Deg   int     `json:"deg"`
+}
+
+// Clouds struct for the "clouds" field
+type Clouds struct {
+	All int `json:"all"`
+}
+
+// System struct for the "sys" field
+type System struct {
+	Type     int    `json:"type"`
+	ID       int    `json:"id"`
+	Country  string `json:"country"`
+	Sunrise  int    `json:"sunrise"`
+	Sunset   int    `json:"sunset"`
+}
+
+func printMain(w WeatherResponse) {
+  fmt.Printf("Location:        %s\n", w.Name)
+  fmt.Printf("Time Zone:       %d\n",w.Timezone)
+  fmt.Printf("Description:     %s\n", w.Weather[0].Description)
+  fmt.Printf("Temperature:     %.1f°C\n", w.Main.Temp)
+  fmt.Printf("Feels like:      %.1f°C\n", w.Main.FeelsLike)
+  fmt.Printf("Humidity:        %d%%\n", w.Main.Humidity)
 }
 
 func main() {
   
-  res, err := http.Get("https://api.openweathermap.org/data/2.5/weather?q=London,uk&appid=8a9e98d41de585beb8405200c2b50dee")
+  res, err := http.Get("https://api.openweathermap.org/data/2.5/weather?q=London,uk&appid=8a9e98d41de585beb8405200c2b50dee&units=metric")
   if err != nil {
     panic(err)
   }
@@ -52,12 +96,11 @@ func main() {
     panic(err)
   }
 
-  var weather Weather
+  var weather WeatherResponse
   err = json.Unmarshal(body, &weather)
 
   if err != nil {
     panic(err)
   }
-  fmt.Println(weather)
-  
+  printMain(weather)
 }
