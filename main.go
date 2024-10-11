@@ -5,6 +5,7 @@ import (
   "fmt"
   "io"
   "net/http"
+  "os"
 )
 
 type WeatherResponse struct {
@@ -69,18 +70,50 @@ type System struct {
 	Sunset   int    `json:"sunset"`
 }
 
+func formatWind(w WeatherResponse) string {
+  degree := w.Wind.Deg
+
+  if (degree >= 337 && degree < 22) {
+    return "North"
+  } else if (degree >= 22 && degree < 67) {
+    return "North-East"
+  } else if (degree >= 67 && degree < 112) {
+    return "East"
+  } else if (degree >= 112 && degree < 157) {
+    return "South-East"
+  } else if (degree >= 157 && degree < 202) {
+    return "South"
+  } else if (degree >= 202 && degree < 247) {
+    return "South-West"
+  } else if (degree >= 247 && degree < 292) {
+    return "West"
+  } else {
+    return "North West"
+  } 
+}
+
 func printMain(w WeatherResponse) {
-  fmt.Printf("Location:        %s\n", w.Name)
-  fmt.Printf("Time Zone:       %d\n",w.Timezone)
+  fmt.Printf("City:            %s\n", w.Name)
+  fmt.Printf("Country:         %s\n", w.Sys.Country)
   fmt.Printf("Description:     %s\n", w.Weather[0].Description)
   fmt.Printf("Temperature:     %.1f°C\n", w.Main.Temp)
   fmt.Printf("Feels like:      %.1f°C\n", w.Main.FeelsLike)
+}
+
+func printExtended(w WeatherResponse) {
+  printMain(w)
+  fmt.Printf("Wind Speed:      %.1fm/s\n", w.Wind.Speed)
+  fmt.Printf("Wind Direction:  %d° (%s)\n", w.Wind.Deg, formatWind(w))
   fmt.Printf("Humidity:        %d%%\n", w.Main.Humidity)
+  fmt.Printf("Cloud Coverage:  %d%%\n",w.Clouds.All)
 }
 
 func main() {
-  
-  res, err := http.Get("https://api.openweathermap.org/data/2.5/weather?q=London,uk&appid=8a9e98d41de585beb8405200c2b50dee&units=metric")
+  city := os.Args[1]
+
+  APIcall1 := "https://api.openweathermap.org/data/2.5/weather?q="
+  APIcall2 := ",uk&appid=8a9e98d41de585beb8405200c2b50dee&units=metric"
+  res, err := http.Get(APIcall1 + city + APIcall2)
   if err != nil {
     panic(err)
   }
@@ -102,5 +135,5 @@ func main() {
   if err != nil {
     panic(err)
   }
-  printMain(weather)
+  printExtended(weather)
 }
