@@ -5,8 +5,30 @@ import (
   "fmt"
   "io"
   "net/http"
-  "os"
+  "flag"
+  "time"
 )
+
+type WeatherForecast struct {
+  Cod     string  `json:"cod"`
+	Message int     `json:"message"`
+	Cnt     int     `json:"cnt"`
+	List    []Entry `json:"list"`
+	City    System  `json:"city"`
+}
+
+type Entry struct {
+	Dt       int64        `json:"dt"`
+	Main     MainWeather  `json:"main"`
+	Weather  []Weather    `json:"weather"`
+	Clouds   Clouds       `json:"clouds"`
+	Wind     Wind         `json:"wind"`
+	Visibility int        `json:"visibility"`
+	Pop      float64      `json:"pop"`
+	Rain     *Rain        `json:"rain,omitempty"` // optional, use pointer
+	Sys      System       `json:"sys"`
+	DtTxt    string       `json:"dt_txt"`
+}
 
 type WeatherResponse struct {
 	Coord      Coordinates `json:"coord"`
@@ -56,6 +78,10 @@ type Wind struct {
 	Deg   int     `json:"deg"`
 }
 
+type Rain struct {
+	ThreeH float64 `json:"3h"`
+}
+
 // Clouds struct for the "clouds" field
 type Clouds struct {
 	All int `json:"all"`
@@ -63,13 +89,24 @@ type Clouds struct {
 
 // System struct for the "sys" field
 type System struct {
-	Type     int    `json:"type"`
-	ID       int    `json:"id"`
-	Country  string `json:"country"`
-	Sunrise  int    `json:"sunrise"`
-	Sunset   int    `json:"sunset"`
+  ID        int     `json:"id"`
+	Name      string  `json:"name"`
+  Country   string  `json:"country"`
+	Population int    `json:"population"`
+	Timezone  int     `json:"timezone"`
+	Sunrise   int64   `json:"sunrise"`
+	Sunset    int64   `json:"sunset"`}
+
+func formatDate(date string) string {
+  parsedTime, err := time.Parse("2006-01-02", date)
+	if err != nil {
+		panic(err)
+	}
+  formattedDate := parsedTime.Format("02/01/2006")
+  return formattedDate
 }
 
+// formatting the degrees so that wea can print the cardinal direction
 func formatWind(w WeatherResponse) string {
   degree := w.Wind.Deg
 
@@ -92,30 +129,77 @@ func formatWind(w WeatherResponse) string {
   } 
 }
 
+
+// printing the default weather report
 func printMain(w WeatherResponse) {
   fmt.Printf("City:            %s\n", w.Name)
-  fmt.Printf("Country:         %s\n", w.Sys.Country)
   fmt.Printf("Description:     %s\n", w.Weather[0].Description)
   fmt.Printf("Temperature:     %.1f°C\n", w.Main.Temp)
   fmt.Printf("Feels like:      %.1f°C\n", w.Main.FeelsLike)
 }
 
+// printing a detailed weather report
 func printExtended(w WeatherResponse) {
   printMain(w)
+  fmt.Printf("Max Temperature: %.1f°C\n", w.Main.TempMax)
+  fmt.Printf("Min Temperature: %.1f°C\n", w.Main.TempMin)
   fmt.Printf("Wind Speed:      %.1fm/s\n", w.Wind.Speed)
   fmt.Printf("Wind Direction:  %d° (%s)\n", w.Wind.Deg, formatWind(w))
   fmt.Printf("Humidity:        %d%%\n", w.Main.Humidity)
+  fmt.Printf("Visibility:      %dm\n", w.Visibility)
   fmt.Printf("Cloud Coverage:  %d%%\n",w.Clouds.All)
 }
 
-func main() {
-  city := os.Args[1]
+func printMainForecast(wf WeatherForecast) {
+  today := wf.List[0].DtTxt[:10]
+  today_formatted := formatDate(today)
+  fmt.Printf("\nWeather Forecast for today (%s) in %s\n",today_formatted, wf.City.Name)
+  for _, entry := range wf.List {
+    currentDate := entry.DtTxt[:10]
+    time := entry.DtTxt[11:16]
+  
+    if currentDate != today {
+      break
+    }
+    
+    fmt.Printf("%s ===========================\n", time)
+    fmt.Printf("  Weather:         %s\n", entry.Weather[0].Description)
+    fmt.Printf("  Temperature:     %.1f°C\n",entry.Main.Temp)
+  }
+}
 
-  APIcall1 := "https://api.openweathermap.org/data/2.5/weather?q="
+func printExtendedForecast() {
+  fmt.Println("skibidi")
+}
+
+func main() {
+  extendPtr := flag.Bool("e", false, "show an extended view of the weather report or forecast")
+  forecastPtr := flag.Bool("f", false, "show the weather forecast for the next 5 days")
+
+  flag.Parse()
+  var city string
+
+  // check if we have any arguments
+
+  if len(flag.Args()) >= 1 {
+    city = flag.Args()[0]
+  } else {
+    // default case
+    city = "London"
+  }
+  
+  var APIcall1 string
+  if (!*forecastPtr) {
+    APIcall1 = "https://api.openweathermap.org/data/2.5/weather?q="
+  } else {
+    APIcall1 = "https://api.openweathermap.org/data/2.5/forecast?q="
+  }
+
   APIcall2 := ",uk&appid=8a9e98d41de585beb8405200c2b50dee&units=metric"
   res, err := http.Get(APIcall1 + city + APIcall2)
+  
   if err != nil {
-    panic(err)
+    panic(err)    
   }
 
   defer res.Body.Close()
@@ -129,11 +213,28 @@ func main() {
     panic(err)
   }
 
+  var weatherf WeatherForecast
   var weather WeatherResponse
-  err = json.Unmarshal(body, &weather)
+
+  if (*forecastPtr) {
+    err = json.Unmarshal(body, &weatherf)
+  } else {
+    err = json.Unmarshal(body, &weather)
+  }
 
   if err != nil {
     panic(err)
   }
-  printExtended(weather)
+
+  if (*extendPtr && !*forecastPtr) {
+    printExtended(weather)
+  } else if (!*extendPtr && !*forecastPtr) {
+    printMain(weather)
+  } else if (*forecastPtr && !*extendPtr) {
+    printMainForecast(weatherf)
+  } else {
+    printExtendedForecast()
+  }
+    
 }
+
