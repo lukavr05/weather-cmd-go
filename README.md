@@ -1,3 +1,9 @@
-This is my command line program that will provide relevant weather information in terminal using Go and the Weather API
+This is my command line program that provides relevant weather information in terminal using Go and the OpenWeather API
 
-I am also planning to add flags to specify different locations around the world as well as specifying only certain information
+Providing a city in the UK as an argument will retreive the information for that city. Without an argument, the default is set to London
+
+This program also uses flags to specify whether a forecast or extended weather report is desired
+    
+    -f specifies that a weather report is being requested, defaulting to the current day's forecast
+    -e specifies an extended weather report, supplying additional information to the current weather report as well as increasing the range of the weather forecast
+    

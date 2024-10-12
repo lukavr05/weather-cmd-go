@@ -107,8 +107,7 @@ func formatDate(date string) string {
 }
 
 // formatting the degrees so that wea can print the cardinal direction
-func formatWind(w WeatherResponse) string {
-  degree := w.Wind.Deg
+func formatWind(degree int) string {
 
   if (degree >= 337 && degree < 22) {
     return "North"
@@ -144,7 +143,7 @@ func printExtended(w WeatherResponse) {
   fmt.Printf("Max Temperature: %.1f°C\n", w.Main.TempMax)
   fmt.Printf("Min Temperature: %.1f°C\n", w.Main.TempMin)
   fmt.Printf("Wind Speed:      %.1fm/s\n", w.Wind.Speed)
-  fmt.Printf("Wind Direction:  %d° (%s)\n", w.Wind.Deg, formatWind(w))
+  fmt.Printf("Wind Direction:  %d° (%s)\n", w.Wind.Deg, formatWind(w.Wind.Deg))
   fmt.Printf("Humidity:        %d%%\n", w.Main.Humidity)
   fmt.Printf("Visibility:      %dm\n", w.Visibility)
   fmt.Printf("Cloud Coverage:  %d%%\n",w.Clouds.All)
@@ -168,11 +167,34 @@ func printMainForecast(wf WeatherForecast) {
   }
 }
 
-func printExtendedForecast() {
-  fmt.Println("skibidi")
+func printExtendedForecast(wf WeatherForecast) {
+  fmt.Printf("Extended Weather Forecast for %s:\n", wf.City.Name)
+    
+  var lastDate string
+  for _, entry := range wf.List {
+    date := entry.DtTxt[:10] // Extract the date (YYYY-MM-DD)
+    time := entry.DtTxt[11:16] // Extract the time (HH:MM)
+
+    // Print the date only if it has changed
+    if date != lastDate {
+      // Format the date
+      formattedDate := formatDate(date)
+      fmt.Printf("\nDate: %s ===================================\n", formattedDate)
+      lastDate = date // Update the last date to the current date
+    }
+
+    // Print weather information for the current entry
+    fmt.Printf("\n  %s\n", time)
+    fmt.Printf("    Weather: %s\n", entry.Weather[0].Description)
+    fmt.Printf("    Temperature: %.1f°C\n", entry.Main.Temp)
+    fmt.Printf("    Humidity: %d%%\n", entry.Main.Humidity)
+    fmt.Printf("    Wind Speed: %.1fm/s, Direction: %d° (%s)\n", entry.Wind.Speed, entry.Wind.Deg, formatWind(entry.Wind.Deg))
+  }
 }
 
 func main() {
+
+  // defining our flags
   extendPtr := flag.Bool("e", false, "show an extended view of the weather report or forecast")
   forecastPtr := flag.Bool("f", false, "show the weather forecast for the next 5 days")
 
@@ -180,7 +202,6 @@ func main() {
   var city string
 
   // check if we have any arguments
-
   if len(flag.Args()) >= 1 {
     city = flag.Args()[0]
   } else {
@@ -189,12 +210,15 @@ func main() {
   }
   
   var APIcall1 string
+
+  // updating the API call depending on if the -f flag has been set
   if (!*forecastPtr) {
     APIcall1 = "https://api.openweathermap.org/data/2.5/weather?q="
   } else {
     APIcall1 = "https://api.openweathermap.org/data/2.5/forecast?q="
   }
 
+  // defining the rest of the API call and making it
   APIcall2 := ",uk&appid=8a9e98d41de585beb8405200c2b50dee&units=metric"
   res, err := http.Get(APIcall1 + city + APIcall2)
   
@@ -233,7 +257,7 @@ func main() {
   } else if (*forecastPtr && !*extendPtr) {
     printMainForecast(weatherf)
   } else {
-    printExtendedForecast()
+    printExtendedForecast(weatherf)
   }
     
 }
