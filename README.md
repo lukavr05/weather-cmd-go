@@ -4,6 +4,6 @@ Providing a city in the UK as an argument will retreive the information for that
 
 This program also uses flags to specify whether a forecast or extended weather report is desired
     
-    -f specifies that a weather report is being requested, defaulting to the current day's forecast
-    -e specifies an extended weather report, supplying additional information to the current weather report as well as increasing the range of the weather forecast
-    
+    -f      specifies that a weather report is being requested, defaulting to the current day's forecast
+    -e      specifies an extended weather report, supplying additional information to the current weather report as well as increasing the range of the weather forecast
+    -days   an int specifying the number of days to display for the extended weather forecast (between 1 and 5)
