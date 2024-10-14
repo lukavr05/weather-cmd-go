@@ -9,6 +9,7 @@ import (
   "time"
 )
 
+// storing types for the weather forecast
 type WeatherForecast struct {
   Cod     string  `json:"cod"`
 	Message int     `json:"message"`
@@ -17,6 +18,7 @@ type WeatherForecast struct {
 	City    System  `json:"city"`
 }
 
+// storing the values of each entry of a forecast
 type Entry struct {
 	Dt       int64        `json:"dt"`
 	Main     MainWeather  `json:"main"`
@@ -30,6 +32,7 @@ type Entry struct {
 	DtTxt    string       `json:"dt_txt"`
 }
 
+// storing weather response for the current weather
 type WeatherResponse struct {
 	Coord      Coordinates `json:"coord"`
 	Weather    []Weather   `json:"weather"`
@@ -78,6 +81,7 @@ type Wind struct {
 	Deg   int     `json:"deg"`
 }
 
+// rain struct for the "rain" field
 type Rain struct {
 	ThreeH float64 `json:"3h"`
 }
@@ -97,6 +101,7 @@ type System struct {
 	Sunrise   int64   `json:"sunrise"`
 	Sunset    int64   `json:"sunset"`}
 
+// function for formatting the date in YYYY-MM-DD into DD/MM/YYYY
 func formatDate(date string) string {
   parsedTime, err := time.Parse("2006-01-02", date)
 	if err != nil {
@@ -149,10 +154,16 @@ func printExtended(w WeatherResponse) {
   fmt.Printf("Cloud Coverage:  %d%%\n",w.Clouds.All)
 }
 
+// printing the default forecast of the current day
 func printMainForecast(wf WeatherForecast) {
+  // extract the date from the first entry and format it
   today := wf.List[0].DtTxt[:10]
   today_formatted := formatDate(today)
+
+  // print current weather
   fmt.Printf("\nWeather Forecast for today (%s) in %s\n",today_formatted, wf.City.Name)
+
+  // iterate through the list and print weather for each time until the date is not today
   for _, entry := range wf.List {
     currentDate := entry.DtTxt[:10]
     time := entry.DtTxt[11:16]
@@ -167,9 +178,11 @@ func printMainForecast(wf WeatherForecast) {
   }
 }
 
+// print an extended version of the weather forecast for the next 5 days
 func printExtendedForecast(wf WeatherForecast) {
   fmt.Printf("Extended Weather Forecast for %s:\n", wf.City.Name)
-    
+  
+  // store the last date 
   var lastDate string
   for _, entry := range wf.List {
     date := entry.DtTxt[:10] // Extract the date (YYYY-MM-DD)
@@ -184,11 +197,13 @@ func printExtendedForecast(wf WeatherForecast) {
     }
 
     // Print weather information for the current entry
-    fmt.Printf("\n  %s\n", time)
-    fmt.Printf("    Weather: %s\n", entry.Weather[0].Description)
-    fmt.Printf("    Temperature: %.1f°C\n", entry.Main.Temp)
-    fmt.Printf("    Humidity: %d%%\n", entry.Main.Humidity)
-    fmt.Printf("    Wind Speed: %.1fm/s, Direction: %d° (%s)\n", entry.Wind.Speed, entry.Wind.Deg, formatWind(entry.Wind.Deg))
+    fmt.Printf("\t%s\t\t", time)
+    fmt.Printf("Weather: %s\n", entry.Weather[0].Description)
+    fmt.Printf("\t\t\tTemperature: %.1f°C\n", entry.Main.Temp)
+    fmt.Printf("\t\t\tHumidity: %d%%\n", entry.Main.Humidity)
+    fmt.Printf("\t\t\tWind Speed: %.1fm/s\n",entry.Wind.Speed)
+    fmt.Printf("\t\t\tDirection: %d° (%s)\n", entry.Wind.Deg, formatWind(entry.Wind.Deg))
+    fmt.Println("\t-----------------------------------------------")
   }
 }
 
@@ -222,16 +237,18 @@ func main() {
   APIcall2 := ",uk&appid=8a9e98d41de585beb8405200c2b50dee&units=metric"
   res, err := http.Get(APIcall1 + city + APIcall2)
   
+  // checking for an error
   if err != nil {
     panic(err)    
   }
 
+  // closing the connection
   defer res.Body.Close()
-
   if res.StatusCode != 200 {
     panic("Weather API not available!")
   }
-
+  
+  // reading the response and storing in the body
   body, err := io.ReadAll(res.Body)
   if err != nil {
     panic(err)
@@ -239,10 +256,12 @@ func main() {
 
   var weatherf WeatherForecast
   var weather WeatherResponse
-
+  
   if (*forecastPtr) {
+    // if we have the -f flag, store the information in the WeatherForecast struct
     err = json.Unmarshal(body, &weatherf)
   } else {
+    // if we don't have the -f flag, store the information in the WeatherResponse struct
     err = json.Unmarshal(body, &weather)
   }
 
@@ -250,6 +269,7 @@ func main() {
     panic(err)
   }
 
+  // checking for -e and -f flags and printing the response accordingly
   if (*extendPtr && !*forecastPtr) {
     printExtended(weather)
   } else if (!*extendPtr && !*forecastPtr) {
@@ -259,6 +279,5 @@ func main() {
   } else {
     printExtendedForecast(weatherf)
   }
-    
 }
 
