@@ -136,22 +136,20 @@ func formatWind(degree int) string {
 
 // printing the default weather report
 func printMain(w WeatherResponse) {
-  fmt.Printf("City:            %s\n", w.Name)
-  fmt.Printf("Description:     %s\n", w.Weather[0].Description)
-  fmt.Printf("Temperature:     %.1f°C\n", w.Main.Temp)
-  fmt.Printf("Feels like:      %.1f°C\n", w.Main.FeelsLike)
+  fmt.Printf("\nCity:              %s\n", w.Name)
+  fmt.Printf("Description:       %s\n", w.Weather[0].Description)
+  fmt.Printf("Temperature:       %.1f°C\n", w.Main.Temp)
+  fmt.Printf("Feels like:        %.1f°C\n", w.Main.FeelsLike)
 }
 
 // printing a detailed weather report
 func printExtended(w WeatherResponse) {
-  printMain(w)
-  fmt.Printf("Max Temperature: %.1f°C\n", w.Main.TempMax)
-  fmt.Printf("Min Temperature: %.1f°C\n", w.Main.TempMin)
-  fmt.Printf("Wind Speed:      %.1fm/s\n", w.Wind.Speed)
-  fmt.Printf("Wind Direction:  %d° (%s)\n", w.Wind.Deg, formatWind(w.Wind.Deg))
-  fmt.Printf("Humidity:        %d%%\n", w.Main.Humidity)
-  fmt.Printf("Visibility:      %dm\n", w.Visibility)
-  fmt.Printf("Cloud Coverage:  %d%%\n",w.Clouds.All)
+  fmt.Printf("\nCity:              %s\n", w.Name)
+  fmt.Printf("Description:       %s\tWind Speed:        %.1fm/s\n", w.Weather[0].Description,w.Wind.Speed)
+  fmt.Printf("Temperature:       %.1f°C\t\tWind Direction:    %d° (%s)\n", w.Main.Temp, w.Wind.Deg, formatWind(w.Wind.Deg))
+  fmt.Printf("Feels like:        %.1f°C\t\tVisibility:        %dm\n", w.Main.FeelsLike, w.Visibility)
+  fmt.Printf("Max Temperature:   %.1f°C\t\tHumidity:          %d%%\n", w.Main.TempMax, w.Main.Humidity)
+  fmt.Printf("Min Temperature:   %.1f°C\t\tCloud Coverage:    %d%%\n", w.Main.TempMin, w.Clouds.All)
 }
 
 // printing the default forecast of the current day
@@ -172,7 +170,7 @@ func printMainForecast(wf WeatherForecast) {
       break
     }
     
-    fmt.Printf("%s ===========================\n", time)
+    fmt.Printf("%s =================================\n", time)
     fmt.Printf("  Weather:         %s\n", entry.Weather[0].Description)
     fmt.Printf("  Temperature:     %.1f°C\n",entry.Main.Temp)
   }
@@ -180,17 +178,15 @@ func printMainForecast(wf WeatherForecast) {
 
 // print an extended version of the weather forecast for the next 5 days
 func printExtendedForecast(wf WeatherForecast, days int) {
-  fmt.Printf("Extended Weather Forecast for %s:\n", wf.City.Name)
+  fmt.Printf("\nExtended Weather Forecast for %s for the next %d days:\n", wf.City.Name, days)
 
   // Validating the number of days input by the user
   if days > 5 {
     days = 5
-    fmt.Println("\n   !!! Specified number of days greater than maximum supplied by the API, using maximum of 5")
   }
 
   if days <= 0 {
     days = 1
-    fmt.Println("\n   !!! Specified number of days less than minimum required, using minimum of 1")
   }
   
   // store the last date 
@@ -209,7 +205,7 @@ func printExtendedForecast(wf WeatherForecast, days int) {
 
       // Format the date
       formattedDate := formatDate(date)
-      fmt.Printf("\nDate: %s ===================================\n", formattedDate)
+      fmt.Printf("\n%s ============================================================================\n", formattedDate)
       lastDate = date // Update the last date to the current date
       printedDays++
     }
@@ -217,11 +213,9 @@ func printExtendedForecast(wf WeatherForecast, days int) {
     // Print weather information for the current entry
     fmt.Printf("\t%s\t\t", time)
     fmt.Printf("Weather: %s\n", entry.Weather[0].Description)
-    fmt.Printf("\t\t\tTemperature: %.1f°C\n", entry.Main.Temp)
-    fmt.Printf("\t\t\tHumidity: %d%%\n", entry.Main.Humidity)
-    fmt.Printf("\t\t\tWind Speed: %.1fm/s\n",entry.Wind.Speed)
-    fmt.Printf("\t\t\tDirection: %d° (%s)\n", entry.Wind.Deg, formatWind(entry.Wind.Deg))
-    fmt.Println("\t-----------------------------------------------")
+    fmt.Printf("\t\t\tTemperature: %.1f°C\t\tHumidity: %d%%\n", entry.Main.Temp, entry.Main.Humidity)
+    fmt.Printf("\t\t\tWind Speed: %.1fm/s\t\tDirection: %d° (%s)\n",entry.Wind.Speed, entry.Wind.Deg, formatWind(entry.Wind.Deg))
+    fmt.Println("\t-------------------------------------------------------------------------------")
   }
 }
 
@@ -303,7 +297,7 @@ func main() {
     }
 
     if *numDaysPtr <= 0 {
-      fmt.Println("\n   !!! Specified number of days less than minimum required, using minimum of 1")
+      fmt.Println("\n   !!! Specified number of days less than minimum required, used minimum of 1")
     }
   }
 }
