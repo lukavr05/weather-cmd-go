@@ -179,21 +179,39 @@ func printMainForecast(wf WeatherForecast) {
 }
 
 // print an extended version of the weather forecast for the next 5 days
-func printExtendedForecast(wf WeatherForecast) {
+func printExtendedForecast(wf WeatherForecast, days int) {
   fmt.Printf("Extended Weather Forecast for %s:\n", wf.City.Name)
+
+  // Validating the number of days input by the user
+  if days > 5 {
+    days = 5
+    fmt.Println("\n   !!! Specified number of days greater than maximum supplied by the API, using maximum of 5")
+  }
+
+  if days <= 0 {
+    days = 1
+    fmt.Println("\n   !!! Specified number of days less than minimum required, using minimum of 1")
+  }
   
   // store the last date 
   var lastDate string
+  var printedDays int
+  
   for _, entry := range wf.List {
     date := entry.DtTxt[:10] // Extract the date (YYYY-MM-DD)
     time := entry.DtTxt[11:16] // Extract the time (HH:MM)
-
+    
     // Print the date only if it has changed
     if date != lastDate {
+      if printedDays >= days {
+        break
+      }
+
       // Format the date
       formattedDate := formatDate(date)
       fmt.Printf("\nDate: %s ===================================\n", formattedDate)
       lastDate = date // Update the last date to the current date
+      printedDays++
     }
 
     // Print weather information for the current entry
@@ -211,7 +229,8 @@ func main() {
 
   // defining our flags
   extendPtr := flag.Bool("e", false, "show an extended view of the weather report or forecast")
-  forecastPtr := flag.Bool("f", false, "show the weather forecast for the next 5 days")
+  forecastPtr := flag.Bool("f", false, "show the weather forecast")
+  numDaysPtr := flag.Int("days", 1, "specifies the number of days (1-5) to show for the forecast, including the current day")
 
   flag.Parse()
   var city string
@@ -239,7 +258,7 @@ func main() {
   
   // checking for an error
   if err != nil {
-    panic(err)    
+    panic(err)     
   }
 
   // closing the connection
@@ -277,7 +296,15 @@ func main() {
   } else if (*forecastPtr && !*extendPtr) {
     printMainForecast(weatherf)
   } else {
-    printExtendedForecast(weatherf)
+    printExtendedForecast(weatherf, *numDaysPtr)
+
+    if *numDaysPtr > 5 {
+      fmt.Println("\n   !!! Specified number of days greater than maximum supplied by the API, used maximum of 5")
+    }
+
+    if *numDaysPtr <= 0 {
+      fmt.Println("\n   !!! Specified number of days less than minimum required, using minimum of 1")
+    }
   }
 }
 
