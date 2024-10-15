@@ -151,11 +151,12 @@ func printMain(w WeatherResponse) {
 // printing a detailed weather report
 func printExtended(w WeatherResponse) {
   fmt.Printf("\nCity:              %s\n", w.Name)
-  fmt.Printf("Description:       %s\tWind Speed:        %.1fm/s\n", w.Weather[0].Description,w.Wind.Speed)
-  fmt.Printf("Temperature:       %.1f°C\t\tWind Direction:    %d° (%s)\n", w.Main.Temp, w.Wind.Deg, formatWind(w.Wind.Deg))
-  fmt.Printf("Feels like:        %.1f°C\t\tVisibility:        %dm\n", w.Main.FeelsLike, w.Visibility)
-  fmt.Printf("Max Temperature:   %.1f°C\t\tHumidity:          %d%%\n", w.Main.TempMax, w.Main.Humidity)
-  fmt.Printf("Min Temperature:   %.1f°C\t\tCloud Coverage:    %d%%\n", w.Main.TempMin, w.Clouds.All)
+  fmt.Printf("Description:       %s\n", w.Weather[0].Description)
+  fmt.Printf("Temperature:       %.1f°C\t\tWind Speed:        %.1fm/s\n", w.Main.Temp, w.Wind.Speed)
+  fmt.Printf("Feels like:        %.1f°C\t\tWind Direction:    %d° (%s)\n", w.Main.FeelsLike, w.Wind.Deg, formatWind(w.Wind.Deg))
+  fmt.Printf("Max Temperature:   %.1f°C\t\tVisibility:        %dm\n", w.Main.TempMax, w.Visibility)
+  fmt.Printf("Min Temperature:   %.1f°C\t\tHumidity:          %d%%\n", w.Main.TempMin, w.Main.Humidity)
+  fmt.Printf("Cloud Coverage:    %d%%\t\t\tGround Pressure:   %dhPa\n", w.Clouds.All, w.Main.GrndLevel)
 }
 
 // printing the default forecast of the current day
@@ -182,11 +183,10 @@ func printMainForecast(wf WeatherForecast) {
   }
 }
 
-// print an extended version of the weather forecast for the next 5 days
+// print an extended version of the weather forecast for the specified number of days
 func printExtendedForecast(wf WeatherForecast, days int) {
-  fmt.Printf("\nExtended Weather Forecast for %s for the next %d days:\n", wf.City.Name, days)
-
-  // Validating the number of days input by the user
+  
+  // Validating number of days input by the user
   if days > 5 {
     days = 5
   }
@@ -194,6 +194,8 @@ func printExtendedForecast(wf WeatherForecast, days int) {
   if days <= 0 {
     days = 1
   }
+ 
+  fmt.Printf("\nExtended Weather Forecast for %s for the next %d day(s):\n", wf.City.Name, days)
   
   // store the last date 
   var lastDate string
@@ -328,7 +330,7 @@ func main() {
   // closing the connection
   defer res.Body.Close()
   if res.StatusCode != 200 {
-    panic("Weather API not available!")
+    panic("Weather API not available! Please check the city name or try again!")
   }
   
   // reading the response and storing in the body
