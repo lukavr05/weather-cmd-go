@@ -102,6 +102,11 @@ type System struct {
 	Sunrise   int64   `json:"sunrise"`
 	Sunset    int64   `json:"sunset"`}
 
+
+type Config struct {
+  DefaultCity string `json:default_city`
+}
+
 // function for formatting the date in YYYY-MM-DD into DD/MM/YYYY
 func formatDate(date string) string {
   parsedTime, err := time.Parse("2006-01-02", date)
@@ -220,50 +225,78 @@ func printExtendedForecast(wf WeatherForecast, days int) {
   }
 }
 
-func main() {
-  var dflt string
-  system_default := "London"
+func loadConfig(path string) (*Config, error) {
+  config := &Config{}
 
-  file, err := os.Open("default.txt")
-  if err != nil {
-    fmt.Println("Error opening default file, please check it exists and has name 'default.txt'")
-    dflt = system_default
+  if _, err := os.Stat(path); os.IsNotExist(err) {
+      // Create default config if file doesn't exist
+      config.DefaultCity = "London" // Default city
+      err := SaveConfig(path, config)
+      if err != nil {
+        return nil, err
+      }
+  } else {
+      // Open the config file
+      file, err := os.Open(path)
+      if err != nil {
+        return nil, err
+      }
+      defer file.Close()
+
+      // Decode the JSON into the config struct
+      decoder := json.NewDecoder(file)
+      err = decoder.Decode(config)
+      if err != nil {
+        return nil, err
+      }
   }
+  return config, nil
+}
 
-  defer file.Close()
+func SaveConfig(path string, config *Config) error {
+    file, err := os.Create(path)
+    if err != nil {
+        return err
+    }
+    defer file.Close()
 
-  user_default, err := io.ReadAll(file)
-  
+    encoder := json.NewEncoder(file)
+    return encoder.Encode(config)
+}
+
+func main() {
+  configPath := "config.json"
+  system_default := "London"
+  dflt := ""
+
+  config, err := loadConfig(configPath)
   if err != nil {
-    fmt.Println("Error reading default file:", err)
-    dflt = system_default
-  } else if string(user_default) == "" {
+    fmt.Println(" !!! Error loading configuration: ", err)
     dflt = system_default
   } else {
-    dflt = string(user_default)
+    user_default := config.DefaultCity
+    dflt = user_default
   }
 
-  // defining our flags
+  // defining flags
   extendPtr := flag.Bool("e", false, "show an extended view of the weather report or forecast")
   forecastPtr := flag.Bool("f", false, "show the weather forecast")
   numDaysPtr := flag.Int("days", 1, "specifies the number of days (1-5) to show for the forecast, including the current day")
-  setDefaultPtr := flag.String("setdefault", dflt, "set the default location to set for the program")
+  setDefaultPtr := flag.String("setdefault", dflt , "set the default location to set for the program")
   defaultPtr := flag.Bool("default", false, "show the default location for weather reporting, if no config has been made, the system defaults to 'London'")
 
   flag.Parse()
   var city string
 
   if *setDefaultPtr != dflt {
-    file, err := os.Create("default.txt")
+    config.DefaultCity = *setDefaultPtr
+    fmt.Printf("Setting default city to %s...\n", *setDefaultPtr)
+    err := SaveConfig(configPath, config)
     if err != nil {
-      panic(err)
+      fmt.Println(" !!! Error saving configuration: ", err)
     }
-    defer file.Close()
-    
-    _, err = file.WriteString(*setDefaultPtr)
-    if err != nil {
-      fmt.Println("Error writing to file:", err)
-    }
+    fmt.Printf("Default city successfully set to %s!\n", config.DefaultCity)
+    dflt = config.DefaultCity
   }
 
   // check if we have any arguments
@@ -339,7 +372,7 @@ func main() {
   }
 
   if *defaultPtr {
-    fmt.Printf("\nDefault city set to:  %s", dflt)
+    fmt.Printf("\nDefault city currently set to %s", dflt)
   }
 }
 
