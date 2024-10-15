@@ -19,7 +19,7 @@ CMD Terminal app that provides relevant weather information in terminal using Go
     - To specify the number of days to be shown, **including the current day**, use the `-days` flag followed by the number of days to show (e.g - `-days {num}`)
 
 
-> [WARNING]
+> [!WARNING]
 > for now, **ONLY cities in England** are fetched as a location from the API.
 
 ---
