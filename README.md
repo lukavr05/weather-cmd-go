@@ -4,11 +4,12 @@ CMD Terminal app that provides relevant weather information in terminal using Go
 ### Installing
 - clone this repo
 - cd into the 'weather-cmd-go'
-- build the app with `go build main.go`
+- build the app with `go build -o weather main.go`
     - a binary should be created without any errors.
+- for Linux users, use command `sudo mv usr/local/bin ./weather`
 
 ## Usage 
-- After the steps above, run the app in your terminal with `./weather`
+- After the steps above, run the app in your terminal with `./weather` (or just `weather` if you have it in your usr/local/bin)
 - When running the program, add a city in the UK as an argument to specify a location (e.g. - `go run main.go {city_name}`)
 - For a view of the **current** weather in a location, no flags are necessary
     - The weather-cmd-go app will show a simple view of the default city's forecast. (set to `London`)
