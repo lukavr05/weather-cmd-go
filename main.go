@@ -116,10 +116,7 @@ func Must[T any](v T, err error) T {
 
 // function for formatting the date in YYYY-MM-DD into DD/MM/YYYY
 func formatDate(date string) string {
-	parsedTime, err := time.Parse("2006-01-02", date)
-	if err != nil {
-		panic(err)
-	}
+	parsedTime := Must(time.Parse("2006-01-02", date))
 	formattedDate := parsedTime.Format("02/01/2006")
 	return formattedDate
 }
