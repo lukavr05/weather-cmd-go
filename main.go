@@ -1,4 +1,4 @@
-package main
+package main 
 
 import (
 	"encoding/json"
@@ -105,6 +105,13 @@ type System struct {
 
 type Config struct {
 	DefaultCity string `json:default_city`
+}
+
+func Must[T any](v T, err error) T {
+	if err != nil {
+		panic(err)
+	}
+	return v
 }
 
 // function for formatting the date in YYYY-MM-DD into DD/MM/YYYY
@@ -271,10 +278,8 @@ func loadConfig(path string) (*Config, error) {
 		}
 	} else {
 		// Open the config file
-		file, err := os.Open(path)
-		if err != nil {
-			return nil, err
-		}
+		file := Must(os.Open(path))
+		
 		defer file.Close()
 
 		// Decode the JSON into the config struct
@@ -288,10 +293,8 @@ func loadConfig(path string) (*Config, error) {
 }
 
  func SaveConfig(path string, config *Config) error {
-	file, err := os.Create(path)
-	if err != nil {
-		return err
-	}
+	file := Must(os.Create(path))
+	
 	defer file.Close()
 
 	encoder := json.NewEncoder(file)
@@ -364,11 +367,7 @@ func main() {
 
 	// defining the rest of the API call and making it
 	APIcall2 := ",uk&appid=8a9e98d41de585beb8405200c2b50dee&units=metric"
-	res, err := http.Get(APIcall1 + city + APIcall2)
-	// checking for an error
-	if err != nil {
-		panic(err)
-	}
+	res := Must(http.Get(APIcall1 + city + APIcall2))
 
 	// closing the connection
 	defer res.Body.Close()
@@ -377,10 +376,7 @@ func main() {
 	}
 
 	// reading the response and storing in the body
-	body, err := io.ReadAll(res.Body)
-	if err != nil {
-		panic(err)
-	}
+	body := Must(io.ReadAll(res.Body))
 
 	var weatherf WeatherForecast
 	var weather WeatherResponse
