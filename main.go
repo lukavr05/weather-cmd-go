@@ -1,7 +1,7 @@
 package main 
 
 import (
-	"encoding/json"
+	"gopkg.in/yaml.v3"
 	"flag"
 	"fmt"
 	"io"
@@ -104,7 +104,7 @@ type System struct {
 }
 
 type Config struct {
-	DefaultCity string `json:default_city`
+	DefaultCity string `yaml:"default_city"`
 }
 
 func Must[T any](v T, err error) T {
