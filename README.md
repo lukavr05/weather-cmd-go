@@ -54,4 +54,4 @@ This program makes use of a configuration file to store the default city that is
 > Without setting the default or having the config file in the path, the system will use "London" as its default. This can be changed in the program itself in the main function denoted by the
 `system_default` variable
 
-If no `config.json` file exists in the current directory, calling `-setdefault` will create one
+If no `config.yml` file exists in the current directory, calling `-setdefault` will create one
