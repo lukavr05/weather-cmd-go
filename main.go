@@ -2,6 +2,7 @@ package main
 
 import (
 	"gopkg.in/yaml.v3"
+  "encoding/json"
 	"flag"
 	"fmt"
 	"io"
@@ -280,7 +281,7 @@ func loadConfig(path string) (*Config, error) {
 		defer file.Close()
 
 		// Decode the JSON into the config struct
-		decoder := json.NewDecoder(file)
+		decoder := yaml.NewDecoder(file)
 		err = decoder.Decode(config)
 		if err != nil {
 			return nil, err
@@ -294,12 +295,12 @@ func loadConfig(path string) (*Config, error) {
 	
 	defer file.Close()
 
-	encoder := json.NewEncoder(file)
+	encoder := yaml.NewEncoder(file)
 	return encoder.Encode(config)
 }
 
 func main() {
-	configPath := "config.json"
+	configPath := "config.yml"
 	system_default := "London"
 	dflt := ""
 
