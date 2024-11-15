@@ -4,6 +4,7 @@ import (
 	"gopkg.in/yaml.v3"
   "encoding/json"
 	"flag"
+  "strings"
 	"fmt"
 	"io"
 	"net/http"
@@ -145,16 +146,21 @@ func formatWind(degree int) string {
 
 // printing the default weather report
 func printMain(w WeatherResponse) {
-	fmt.Printf("\nCity:              %s\n", w.Name)
-	fmt.Printf("Description:       %s\n", w.Weather[0].Description)
+  fmt.Println("////////////////////////////////////////////")
+	fmt.Printf("City:              %s\n", strings.ToUpper(w.Name))
+	fmt.Printf("Description:       %s\n", strings.ToUpper(w.Weather[0].Description))
+  fmt.Println("////////////////////////////////////////////")
 	fmt.Printf("Temperature:       %.1f°C\n", w.Main.Temp)
 	fmt.Printf("Feels like:        %.1f°C\n", w.Main.FeelsLike)
+  fmt.Println("////////////////////////////////////////////")
 }
 
 // printing a detailed weather report
 func printExtended(w WeatherResponse) {
-	fmt.Printf("\nCity:              %s\n", w.Name)
-	fmt.Printf("Description:       %s\n", w.Weather[0].Description)
+  fmt.Println("///////////////////////////////////////////////////////////////////////////")
+	fmt.Printf("City:              %s\n", strings.ToUpper(w.Name))
+	fmt.Printf("Description:       %s\n", strings.ToUpper(w.Weather[0].Description))
+  fmt.Println("///////////////////////////////////////////////////////////////////////////")
 	fmt.Printf(
 		"Temperature:       %.1f°C\t\tWind Speed:        %.1fm/s\n",
 		w.Main.Temp,
@@ -181,6 +187,7 @@ func printExtended(w WeatherResponse) {
 		w.Clouds.All,
 		w.Main.GrndLevel,
 	)
+  fmt.Println("///////////////////////////////////////////////////////////////////////////")
 }
 
 // printing the default forecast of the current day
