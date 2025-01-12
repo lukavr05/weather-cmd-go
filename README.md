@@ -2,11 +2,10 @@
 CMD Terminal app that provides relevant weather information in terminal using Go and the [OpenWeather](https://openweathermap.org/) API
 
 ### Installing
-- clone this repo
-- cd into the 'weather-cmd-go'
-- build the app with `go build -o weather main.go`
-    - a binary should be created without any errors.
-- for Linux users, use command `sudo mv usr/local/bin ./weather`
+- Clone the repository
+- cd into `weather-cmd-go`
+- Build the app with `go build -o weather main.go`
+- For Linux users, use command `sudo mv usr/local/bin ./weather`
 
 ## Usage 
 - After the steps above, run the app in your terminal with `./weather` (or just `weather` if you have it in your usr/local/bin)
