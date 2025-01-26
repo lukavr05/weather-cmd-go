@@ -144,8 +144,17 @@ func formatWind(degree int) string {
 	}
 }
 
+func printHeader() {
+  fmt.Println("                        _    _\n" +                
+"                       | |  | |\n" +                
+"__      __  ___   __ _ | |_ | |__    ___  _ __\n" + 
+"\\ \\ /\\ / / / _ \\ / _` || __|| '_ \\  / _ \\| '__|\n" +
+" \\ V  V / |  __/| (_| || |_ | | | ||  __/| |   \n" +
+"  \\_/\\_/   \\___| \\__,_| \\__||_| |_| \\___||_|   ")
+}
 // printing the default weather report
 func printMain(w WeatherResponse) {
+  printHeader()
   fmt.Println("////////////////////////////////////////////")
 	fmt.Printf("City:              %s\n", strings.ToUpper(w.Name))
 	fmt.Printf("Description:       %s\n", strings.ToUpper(w.Weather[0].Description))
