@@ -151,6 +151,7 @@ func printHeader() {
 "\\ \\ /\\ / / / _ \\ / _` || __|| '_ \\  / _ \\| '__|\n" +
 " \\ V  V / |  __/| (_| || |_ | | | ||  __/| |   \n" +
 "  \\_/\\_/   \\___| \\__,_| \\__||_| |_| \\___||_|   ")
+  fmt.Println("")
 }
 // printing the default weather report
 func printMain(w WeatherResponse) {
@@ -166,6 +167,7 @@ func printMain(w WeatherResponse) {
 
 // printing a detailed weather report
 func printExtended(w WeatherResponse) {
+  printHeader()
   fmt.Println("///////////////////////////////////////////////////////////////////////////")
 	fmt.Printf("City:              %s\n", strings.ToUpper(w.Name))
 	fmt.Printf("Description:       %s\n", strings.ToUpper(w.Weather[0].Description))
